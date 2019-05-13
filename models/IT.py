@@ -6,7 +6,7 @@ class IT:
         self.name = "IT method (Incl´an, Tiao, 1994)"
         self.__q99 = 1.628
 
-        self.std_residuals = resid / conditional_volatility  # should power 2 but I don't know
+        self.std_residuals = np.power(resid / conditional_volatility, 2)  # should power 2 but I don't know
         self.len_ = self.std_residuals.shape[0]
 
         self.tau = None
@@ -27,7 +27,7 @@ class IT:
 
     def evaluate(self):
         self.tau = self.compute_tau()
-        self.structural_break_factor = np.sqrt(self.len_ / 2) * np.abs(self.compute_it(self.compute_tau()))
+        self.structural_break_factor = np.sqrt(self.len_ / 2) * np.abs(self.compute_it(self.tau))
         if self.structural_break_factor >= self.__q99:
             print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
             return self.structural_break_factor

@@ -71,3 +71,6 @@ class KL:
         if self.structural_break_factor >= self.__q99:
             print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
             return self.structural_break_factor
+
+    def __str__(self):
+        return f"{'=' * 50} \nTau: {self.tau} \nStructural Break Factor {self.structural_break_factor} \n{'=' * 50}"
