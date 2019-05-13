@@ -66,7 +66,7 @@ class KL:
     def evaluate(self):
         self.tau = self.compute_tau_glob()
         self.v = self.compute_v()
-        self.kl_result = self.compute_kl(self.tau)
+        self.kl_result = np.abs(self.compute_kl(self.tau))
         self.structural_break_factor = self.kl_result / self.v
         if self.structural_break_factor >= self.__q99:
             print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
