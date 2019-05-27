@@ -88,47 +88,55 @@ class ICSS:
         self.breaks = []
 
     def left_search(self, t_left, t_right):
-        t1 = t_left
-        t2 = t_right
+        left_bound = t_left
+        right_bound = t_right
         for _ in range(self.T):
             # print(t1, t2)
-            model = KL(self.y[t1:t2])
+            model = KL(self.y[left_bound:right_bound])
             if model.evaluate():
                 # print(model.tau)
-                t2 = model.tau
+                right_bound = model.tau
             else:
-                print(t1, t2)
-                return t2 + t1
+                # print(f"l_b = {left_bound} r_b = {right_bound}")
+                return left_bound + right_bound if left_bound + right_bound < self.T else 0
 
     def right_search(self, t_left, t_right):
-        t1 = t_left
-        t2 = t_right
+        left_bound = t_left
+        right_bound = t_right
         for _ in range(self.T):
             # print(t1, t2)
-            model = KL(self.y[t1:t2])
+            model = KL(self.y[left_bound:right_bound])
             if model.evaluate():
                 # print(model.tau)
-                t1 += model.tau
+                left_bound += model.tau + 1
+                # print(f"l = {left_bound}")
             else:
-                return t1 - 1
+                return left_bound - 1
 
     def search(self, t_init_left, t_init_right):
-        print("Left")
         t_first = self.left_search(t_left=t_init_left, t_right=t_init_right)
-        print("Right")
         t_last = self.right_search(t_left=t_first + 1, t_right=t_init_right)
         results = [t_init_left, t_first, t_last, t_init_right]
         while t_first < t_last:
-            print(f"t_f = {t_first} t_l = {t_last}")
             t_first = self.left_search(t_left=t_first, t_right=t_last)
             t_last = self.right_search(t_left=t_first + 1, t_right=t_last)
             results.append(t_first)
             results.append(t_last)
         return sorted(list(set(results)))
 
+    def select_breaks(self, breaks):
+        result = []
+        for i in range(1, len(breaks) - 1):
+            model = KL(time_series=self.y[breaks[i - 1] + 1: breaks[i + 1]])
+            if model.evaluate():
+                result.append(breaks[i])
+        return result
+
     def run(self):
         self.breaks = self.search(0, self.T)
-
+        for i in range(1):
+            print(self.breaks)
+            self.breaks = self.select_breaks(self.breaks)
         return self.breaks
 
     def plot(self):
