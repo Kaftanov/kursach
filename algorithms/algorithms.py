@@ -125,19 +125,31 @@ class ICSS:
         return sorted(list(set(results)))
 
     def select_breaks(self, breaks):
-        result = []
+        result = [breaks[0]]
         for i in range(1, len(breaks) - 1):
             model = KL(time_series=self.y[breaks[i - 1] + 1: breaks[i + 1]])
             if model.evaluate():
                 result.append(breaks[i])
+        result.append(breaks[-1])
         return result
 
-    def run(self):
+    def run(self, clean=False):
         self.breaks = self.search(0, self.T)
-        for i in range(1):
-            print(self.breaks)
-            self.breaks = self.select_breaks(self.breaks)
-        return self.breaks
+        if clean:
+            prev = self.select_breaks(self.select_breaks(self.breaks))
+            curr = self.select_breaks(self.breaks)
+            for i in range(100):
+                if len(prev) == len(curr):
+                    break
+                else:
+                    prev = self.select_breaks(prev)
+                    curr = self.select_breaks(curr)
+            print(prev, curr)
+            self.breaks = sorted(list(set(prev + curr)))[1:-1]
+            return self.breaks
+        else:
+            self.breaks = self.breaks[1:-1]
+            return self.breaks
 
     def plot(self):
         plt.plot(self.y)
