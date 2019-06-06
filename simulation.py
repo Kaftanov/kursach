@@ -1,29 +1,15 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from arch import arch_model
-
-from methods.methods import KL, LMT, IT
 from algorithms.algorithms import ICSS
-from algorithms.simulate import GARCH
 
+ds_name = "gaz_data.csv"
 
-data = pd.read_csv("data\\ciqpriceequity_201905122302.csv")
-
-np.random.seed(1)
-
-
-# am = arch_model(data["priceclose"], p=1, q=1, vol="GARCH")
-# res = am.fit(update_freq=10)
-# model = IT(res.resid, res.conditional_volatility)
-# model = ICSS(np.log(data["priceclose"].values))
-# model.run()
-# model.plot()
-# plt.show()
-# print(model.breaks)
-generator = GARCH()
-sample = generator.generate_sample(breaks=10, length=2500)
+data = pd.read_csv(f"data\\{ds_name}", parse_dates=["pricingdate"], index_col="pricingdate")
+sample = np.log((data["priceclose"] / data["priceclose"].shift(1)).dropna(axis=0))
 model = ICSS(sample)
-model.run()
+model.evaluate()
+model.print_breakpoints()
 model.plot()
+plt.savefig(f"figures\\ticker_simulation_{ds_name.split('.')[0].split('_')[0]}.png", format='png', dpi=150, quality=100)
 plt.show()

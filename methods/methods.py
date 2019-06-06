@@ -42,14 +42,15 @@ class KL:
 
         :param time_series:
         """
-        self.__name = "KL-CUSUM"
-        self.__q99 = 1.628
+        self._name = "KL-CUSUM"
+        self._q99 = 1.628
+        self._q95 = 1.358
         self.info = info
         self.y = time_series.copy()
         self.y_len = self.y.shape[0]
         self.y_mean = np.mean(self.y)
         self.y_mean_sq = np.power(self.y_mean, 2)
-        self.r_estimate = int(np.sqrt(self.y_len) // 1)
+        self.r_estimate = int(np.sqrt(self.y_len) // 1)  # int(np.log(self.y_len) // 1)  #
 
         self.tau = None
         self.v = None
@@ -107,9 +108,9 @@ class KL:
         self.v = self.compute_v()
         self.kl_result = np.abs(self.compute_kl(self.tau))
         self.structural_break_factor = self.kl_result / self.v
-        if self.structural_break_factor >= self.__q99:
+        if self.structural_break_factor >= self._q95:
             if self.info:
-                print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
+                print(f"tau it's structural break {self.structural_break_factor} >= {self._q95}")
             return self.structural_break_factor
 
     def __str__(self):

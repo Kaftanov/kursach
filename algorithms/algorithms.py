@@ -4,6 +4,7 @@ import numpy as np
 from methods.methods import KL
 import matplotlib.pyplot as plt
 import warnings
+import datetime
 warnings.filterwarnings("ignore")
 
 
@@ -81,10 +82,15 @@ class KS:
 
 
 class ICSS:
-    def __init__(self, time_series):
+    def __init__(self, data):
         self.name = 'ICSS procedure'
-        self.y = time_series
+        self.y = data.values.copy()
+        self.index = data.index
         self.T = self.y.shape[0]
+
+        self.d1 = None
+        self.d2 = None
+
         self.breaks = []
 
     def left_search(self, t_left, t_right):
@@ -104,7 +110,7 @@ class ICSS:
         left_bound = t_left
         right_bound = t_right
         for _ in range(self.T):
-            # print(t1, t2)
+            # print(f'{left_bound} -- {right_bound}')
             model = KL(self.y[left_bound:right_bound])
             if model.evaluate():
                 # print(model.tau)
@@ -133,7 +139,7 @@ class ICSS:
         result.append(breaks[-1])
         return result
 
-    def run(self, clean=False):
+    def evaluate(self, clean=False, exact=False):
         self.breaks = self.search(0, self.T)
         if clean:
             prev = self.select_breaks(self.select_breaks(self.breaks))
@@ -144,21 +150,31 @@ class ICSS:
                 else:
                     prev = self.select_breaks(prev)
                     curr = self.select_breaks(curr)
-            print(prev, curr)
+            # print(prev, curr)
             self.breaks = sorted(list(set(prev + curr)))[1:-1]
-            return self.breaks
         else:
             self.breaks = self.breaks[1:-1]
+        if exact:
+            pass
+        else:
             return self.breaks
 
+    def print_breakpoints(self):
+        for break_index in self.breaks:
+            print(f'structural break at = {self.index[break_index]} ({break_index})')
+
+    def likelihood(self):
+        # TODO add code
+        pass
+
     def plot(self):
-        plt.plot(self.y)
+        plt.plot(self.index, self.y)
         if not self.breaks:
             plt.title("No breaks found")
         else:
             plt.title(f"Found {len(self.breaks)} breaks")
-        for val in self.breaks:
-            plt.axvline(x=val, color='r')
+        for break_indx in self.breaks:
+            plt.axvline(x=self.index[break_indx], color='r')
         plt.xlabel("Time (t)")
         plt.ylabel("Value (val)")
         plt.grid()
