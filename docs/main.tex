@@ -11,8 +11,12 @@
 \usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \usepackage[ruled]{algorithm2e}
 \usepackage{caption}
+
+
+\graphicspath{ {../figures/} }
 
 % \usepackage{tikz} % charts
 % \usepackage{pgfplots} %charts
@@ -224,6 +228,39 @@
 	
 	\clearpage
 	\section{\label{sec:sec3}Апробация методов на реальных данных}
-	
+	Для проверки алгоритма будем использовать два подхода:
+	\begin{enumerate}
+		\item Проверка на синтетических данных GARCH(1, 1) модель
+		\item Проверка на реальных данных - цена акций компаний
+	\end{enumerate}
+	\par
+	Проверка алгоритмов на реальных данных осуществляется на выборке, которая представляет собой цену акции компании с интервалом в один день. В нашем случае был выбрана компания Лукойл (LKOH).
+	\begin{figure}[H]
+		\includegraphics[width=\linewidth]{source_ts_LKOH.png}
+		\caption{\label{fig:fig1} Цена акции Лукойл}
+	\end{figure}
+	Преобразовав временной ряд с помощью следующей формулы:
+	\begin{equation}
+		y_t = \ln(y_t / y_{t-1})
+	\end{equation}
+	\begin{figure}[H]
+		\includegraphics[width=\linewidth]{source_ln_ts_LKOH.png}
+		\caption{\label{fig:fig2} Натуральный логарифм отношения цены во времени с лагом 1}
+	\end{figure}
+	В результате применения ICSS процедуры (которая использует KL-CUSUM метод обнаружения сдвигов) было получено 3 возможных сдвига временного ряда:
+	\begin{enumerate}
+		\item 2006-11-16 - Заявление Лукойл об увеличении количества выпускаемого топлива (бензин) на 23\%
+		\item 2011-12-22 - Вступают в силу поправки Налогового Кодекса, согласно которым акциз на топливо увеличиться. Так же публикация результатов финансового года для компании (по данным отчётов прибыль выросла на 15\%)
+		\item 2012-11-12 - Снижение экспорта нефтепродуктов через терминалы ЛУКОЙЛ (до 20\%)
+	\end{enumerate}
+	\begin{figure}[H]
+		\includegraphics[width=\linewidth]{ru_stock_simulation_LKOH.png}
+		\caption{\label{fig:fig3} Структурные сдвиги временного ряда}
+	\end{figure}
+	Важно заметить, что ICSS алгоритм (KL-CUSUM) может быть улучшен для получения более точных результатов. В этом случае необходимо вести исследования в следующих направлениях:
+	\begin{enumerate}
+		\item Апробация методов IT, LTM с сочетании с ICSS процедурой
+		\item Улучшении возможностей ICCS процедуру такие как ML-KL-ICSS
+	\end{enumerate}
 
 \end{document}

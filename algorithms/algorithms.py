@@ -168,13 +168,13 @@ class ICSS:
         pass
 
     def plot(self):
-        plt.plot(self.index, self.y)
+        plt.plot(self.index, self.y, color='silver', linestyle='-', marker='.')
         if not self.breaks:
             plt.title("No breaks found")
         else:
             plt.title(f"Found {len(self.breaks)} breaks")
         for break_indx in self.breaks:
-            plt.axvline(x=self.index[break_indx], color='r')
-        plt.xlabel("Time (t)")
-        plt.ylabel("Value (val)")
+            plt.axvline(x=self.index[break_indx], color='black', linestyle='solid')
+        plt.xlabel("Time (Year period)")
+        plt.ylabel("Value")
         plt.grid()
