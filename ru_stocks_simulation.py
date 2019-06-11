@@ -32,7 +32,7 @@ plt.grid()
 plt.savefig(f"figures\\source_ln_ts_{ds_name.split('.')[0].split('_')[0]}.png", format='png', dpi=150, quality=100)
 plt.show()
 
-model = ICSS(sample)
+model = ICSS(sample, method="KL")
 model.evaluate()
 model.print_breakpoints()
 model.plot()

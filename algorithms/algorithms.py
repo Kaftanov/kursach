@@ -1,10 +1,7 @@
-#  Check  Kolmogorov–Smirnov theorem
-
 import numpy as np
 from methods.methods import KL
 import matplotlib.pyplot as plt
 import warnings
-import datetime
 warnings.filterwarnings("ignore")
 
 
@@ -33,9 +30,9 @@ def dist(x_array, y_array, upper_bound=None, complexity_coef=1000):
 
 
 class KS:
-    def __init__(self, data_array):
-        self.y = data_array.copy()
-        self.length = data_array.shape[0]
+    def __init__(self, data):
+        self.y = data.values.copy()
+        self.length = self.y.shape[0]
 
         self.d1, self.d2 = np.random.randint(low=1, high=self.length - 1, size=2)
         self.d_l = None
@@ -75,14 +72,21 @@ class KS:
         self.tau_r = min(tau_ks + self.d2, self.d1)
         return self.tau_ks, self.tau_l, self.tau_r
 
-    def simulate(self):
-        X = np.random.normal(0, 1, 1000)
-        model = KS(data_array=X)
-        print(model.evaluate())
-
 
 class ICSS:
-    def __init__(self, data):
+    def __init__(self, data, method=None):
+        """
+
+        :param data: pd.Series object or object with values and index attributes
+        :param method: method class
+        """
+        if method:
+            if method == "KL":
+                self.core = KL
+            else:
+                self.core = method
+        else:
+            self.core = KL
         self.name = 'ICSS procedure'
         self.y = data.values.copy()
         self.index = data.index
@@ -97,25 +101,19 @@ class ICSS:
         left_bound = t_left
         right_bound = t_right
         for _ in range(self.T):
-            # print(t1, t2)
-            model = KL(self.y[left_bound:right_bound])
+            model = self.core(self.y[left_bound:right_bound])
             if model.evaluate():
-                # print(model.tau)
                 right_bound = model.tau
             else:
-                # print(f"l_b = {left_bound} r_b = {right_bound}")
                 return left_bound + right_bound if left_bound + right_bound < self.T else 0
 
     def right_search(self, t_left, t_right):
         left_bound = t_left
         right_bound = t_right
         for _ in range(self.T):
-            # print(f'{left_bound} -- {right_bound}')
-            model = KL(self.y[left_bound:right_bound])
+            model = self.core(self.y[left_bound:right_bound])
             if model.evaluate():
-                # print(model.tau)
                 left_bound += model.tau + 1
-                # print(f"l = {left_bound}")
             else:
                 return left_bound - 1
 
@@ -133,7 +131,7 @@ class ICSS:
     def select_breaks(self, breaks):
         result = [breaks[0]]
         for i in range(1, len(breaks) - 1):
-            model = KL(time_series=self.y[breaks[i - 1] + 1: breaks[i + 1]])
+            model = self.core(time_series=self.y[breaks[i - 1] + 1: breaks[i + 1]])
             if model.evaluate():
                 result.append(breaks[i])
         result.append(breaks[-1])
@@ -173,8 +171,8 @@ class ICSS:
             plt.title("No breaks found")
         else:
             plt.title(f"Found {len(self.breaks)} breaks")
-        for break_indx in self.breaks:
-            plt.axvline(x=self.index[break_indx], color='black', linestyle='solid')
+        for break_index in self.breaks:
+            plt.axvline(x=self.index[break_index], color='black', linestyle='solid')
         plt.xlabel("Time (Year period)")
         plt.ylabel("Value")
         plt.grid()

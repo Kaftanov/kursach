@@ -6,7 +6,7 @@ from algorithms.algorithms import ICSS
 ds_name = "gaz_data.csv"
 
 data = pd.read_csv(f"data\\{ds_name}", parse_dates=["pricingdate"], index_col="pricingdate")
-sample = np.log((data["priceclose"] / data["priceclose"].shift(1)).dropna(axis=0))
+sample = 100 * data["priceclose"].pct_change().dropna()
 model = ICSS(sample)
 model.evaluate()
 model.print_breakpoints()

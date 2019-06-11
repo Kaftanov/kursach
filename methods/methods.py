@@ -2,13 +2,13 @@ import numpy as np
 
 
 class IT:
-    def __init__(self, resid, conditional_volatility):
-        self.name = "IT method (Incl´an, Tiao, 1994)"
-        self.__q99 = 1.628
-
-        self.std_residuals = np.power(resid / conditional_volatility, 2)  # should power 2 but I don't know
+    def __init__(self, data, info=False):
+        self._name = "IT method (Incl´an, Tiao, 1994)"
+        self._q99 = 1.628
+        self._q95 = 1.358
+        self.info = info
+        self.std_residuals = np.power(data, 2)
         self.len_ = self.std_residuals.shape[0]
-
         self.tau = None
         self.structural_break_factor = None
 
@@ -20,7 +20,7 @@ class IT:
         sum_ = np.sum(self.std_residuals)
         for k in range(1, self.len_ + 1):
             result[k - 1] = (np.sum(self.std_residuals[:k]) / sum_) - (k / self.len_)
-        return result
+        return result if result.shape[0] > 1 else np.array([0])
 
     def compute_tau(self):
         return np.argmax(np.abs(self.compute_it_glob())) + 1
@@ -28,8 +28,9 @@ class IT:
     def evaluate(self):
         self.tau = self.compute_tau()
         self.structural_break_factor = np.sqrt(self.len_ / 2) * np.abs(self.compute_it(self.tau))
-        if self.structural_break_factor >= self.__q99:
-            print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
+        if self.structural_break_factor >= self._q99:
+            if self.info:
+                print(f"tau it's structural break {self.structural_break_factor} >= {self._q99}")
             return self.structural_break_factor
 
     def __str__(self):
@@ -65,12 +66,12 @@ class KL:
             print("Computing KL for all observations")
         a1 = 1 / np.sqrt(self.y_len)
         s2 = np.sum(np.power(self.y, 2))
-        res = np.zeros(self.y_len)
+        result = np.zeros(self.y_len)
         for i in range(1, self.y_len + 1):
             a2 = i / self.y_len
             s1 = np.sum(np.power(self.y[:i], 2))
-            res[i - 1] = (s1 - a2 * s2) * a1
-        return res if not np.all(res) else np.array([0])
+            result[i - 1] = (s1 - a2 * s2) * a1
+        return result if result.shape[0] > 1 else np.array([0])
 
     def compute_tau(self):
         res = np.zeros(self.y_len)
@@ -117,12 +118,13 @@ class KL:
         return f"{'=' * 50} \nTau: {self.tau} \nStructural Break Factor {self.structural_break_factor} \n{'=' * 50}"
 
 
-class LMT:
-    def __init__(self, resid, conditional_volatility):
-        self.__name = "LTM method (Lee, Tokutsu, Maekawa, 2004)"
-        self.__q99 = 1.628
-
-        self.y = resid / conditional_volatility
+class LTM:
+    def __init__(self, time_series, info=False):
+        self._name = "LTM method (Lee, Tokutsu, Maekawa, 2004)"
+        self._q99 = 1.628
+        self._q95 = 1.358
+        self.info = info
+        self.y = time_series.copy()
         self.len_ = self.y.shape[0]
 
         self.y2 = np.power(self.y, 2)
@@ -140,15 +142,17 @@ class LMT:
         div_ = 1 / np.sqrt(self.len_ * self.eta)
         for k in range(1, self.len_ + 1):
             result[k - 1] = div_ * np.abs(np.sum(self.y2[:k]) - (k * sum_))
-        return result
+        return result if result.shape[0] > 1 else np.array([0])
 
     def compute_tau(self):
         return np.argmax(np.abs(self.compute_ltm_glob())) + 1
 
     def evaluate(self):
-        self.structural_break_factor = self.compute_ltm(self.compute_tau())
-        if self.structural_break_factor >= self.__q99:
-            print(f"tau it's structural break {self.structural_break_factor} >= {self.__q99}")
+        self.tau = self.compute_tau()
+        self.structural_break_factor = self.compute_ltm(self.tau)
+        if self.structural_break_factor >= self._q99:
+            if self.info:
+                print(f"tau it's structural break {self.structural_break_factor} >= {self._q99}")
             return self.structural_break_factor
 
     def __str__(self):
