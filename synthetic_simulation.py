@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from algorithms.simulate import GARCH
 from algorithms.algorithms import ICSS
 
-sample = pd.Series(GARCH().generate_sample(breaks=5, length=3000, break_weight=0.5))
+# sample = pd.Series(GARCH().generate_sample(breaks=5, length=3000, break_weight=0.5))
+sample = pd.Series(GARCH().get_sample(breaks=3, length=5000))
 base = datetime.datetime.today()
-sample.index = [base - datetime.timedelta(days=x) for x in range(0, sample.shape[0])]
+sample.index = [base - datetime.timedelta(days=x) for x in range(0, sample.shape[0])][::-1]
 model = ICSS(sample)
 model.evaluate()
 model.print_breakpoints()

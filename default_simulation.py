@@ -3,16 +3,11 @@ import datetime
 import matplotlib.pyplot as plt
 
 from algorithms.algorithms import ICSS
-from methods.methods import KL
 
 
 sample = pd.read_csv("data\\test_data.csv")["Val"]
 base = datetime.datetime.today()
-sample.index = [base - datetime.timedelta(days=x) for x in range(0, sample.shape[0])]
-
-a = KL(sample.values[0:1099])
-a.evaluate()
-print(a)
+sample.index = [base - datetime.timedelta(days=x) for x in range(0, sample.shape[0])][::-1]
 
 model = ICSS(sample)
 model.evaluate()

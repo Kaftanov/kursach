@@ -8,7 +8,7 @@ class GARCH:
         self.a = a if a else [0.3]
         self.b = b if b else [0.2]
 
-    def generate_sample(self, length=1000, breaks=2, break_weight=1):
+    def generate_sample(self, length=1000, breaks=None, break_weight=1):
         p = len(self.a)
         q = len(self.b)
 
@@ -35,3 +35,14 @@ class GARCH:
                 print(f"generated break index = {index}")
                 y[drop_size + index:] = y[drop_size + index:] + np.random.choice([1, -1]) * break_weight
             return y[drop_size:]
+
+    def get_sample(self, length=1000, breaks=None):
+        if not breaks:
+            self.generate_sample(length=length, breaks=breaks)
+        else:
+            result = []
+            for i in range(breaks):
+                self.a[0] *= np.random.choice([-2, 2])
+                self.w += np.random.choice([0.4, -1, 1.7])
+                result.append(self.generate_sample(length=length // breaks, breaks=None))
+            return [item for sub_item in result for item in sub_item]

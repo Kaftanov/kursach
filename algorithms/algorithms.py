@@ -1,6 +1,7 @@
 import numpy as np
 from methods.methods import KL
 import matplotlib.pyplot as plt
+from arch import arch_model
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -83,12 +84,16 @@ class ICSS:
         if method:
             if method == "KL":
                 self.core = KL
+                self.y = data.values.copy()
             else:
                 self.core = method
+                am = arch_model(data.values)
+                res = am.fit(update_freq=5)
+                self.y = res.resid / res.conditional_volatility
         else:
             self.core = KL
         self.name = 'ICSS procedure'
-        self.y = data.values.copy()
+
         self.index = data.index
         self.T = self.y.shape[0]
 
@@ -148,7 +153,6 @@ class ICSS:
                 else:
                     prev = self.select_breaks(prev)
                     curr = self.select_breaks(curr)
-            # print(prev, curr)
             self.breaks = sorted(list(set(prev + curr)))[1:-1]
         else:
             self.breaks = self.breaks[1:-1]

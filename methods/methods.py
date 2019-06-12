@@ -28,9 +28,9 @@ class IT:
     def evaluate(self):
         self.tau = self.compute_tau()
         self.structural_break_factor = np.sqrt(self.len_ / 2) * np.abs(self.compute_it(self.tau))
-        if self.structural_break_factor >= self._q99:
+        if self.structural_break_factor >= self._q95:
             if self.info:
-                print(f"tau it's structural break {self.structural_break_factor} >= {self._q99}")
+                print(f"tau it's structural break {self.structural_break_factor} >= {self._q95}")
             return self.structural_break_factor
 
     def __str__(self):
