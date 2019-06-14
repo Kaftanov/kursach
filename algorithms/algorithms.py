@@ -81,10 +81,10 @@ class ICSS:
         :param data: pd.Series object or object with values and index attributes
         :param method: method class
         """
+        self.y = data.values.copy()
         if method:
             if method == "KL":
                 self.core = KL
-                self.y = data.values.copy()
             else:
                 self.core = method
                 am = arch_model(data.values)
